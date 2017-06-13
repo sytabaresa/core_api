@@ -1,16 +1,16 @@
 package controllers
 
 import (
-	"github.com/udistrital/core_api/models"
 	"encoding/json"
 	"errors"
+	"github.com/udistrital/core_api/models"
 	"strconv"
 	"strings"
 
 	"github.com/astaxie/beego"
 )
 
-// JefeDependenciaController oprations for JefeDependencia
+// JefeDependenciaController operations for JefeDependencia
 type JefeDependenciaController struct {
 	beego.Controller
 }

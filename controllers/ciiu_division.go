@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/udistrital/core_api/models"
+	"strconv"
 	"strings"
+
 	"github.com/astaxie/beego"
 )
 
-//  CiiuDivisionController operations for CiiuDivision
+// CiiuDivisionController operations for CiiuDivision
 type CiiuDivisionController struct {
 	beego.Controller
 }
@@ -31,10 +33,13 @@ func (c *CiiuDivisionController) URLMapping() {
 // @router / [post]
 func (c *CiiuDivisionController) Post() {
 	var v models.CiiuDivision
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if _, err := models.AddCiiuDivision(&v); err == nil {
-		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if _, err := models.AddCiiuDivision(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -49,7 +54,8 @@ func (c *CiiuDivisionController) Post() {
 // @Failure 403 :id is empty
 // @router /:id [get]
 func (c *CiiuDivisionController) GetOne() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	v, err := models.GetCiiuDivisionById(id)
 	if err != nil {
 		c.Data["json"] = err.Error()
@@ -131,11 +137,15 @@ func (c *CiiuDivisionController) GetAll() {
 // @Failure 403 :id is not int
 // @router /:id [put]
 func (c *CiiuDivisionController) Put() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	v := models.CiiuDivision{Id: id}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if err := models.UpdateCiiuDivisionById(&v); err == nil {
-		c.Data["json"] = "OK"
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if err := models.UpdateCiiuDivisionById(&v); err == nil {
+			c.Data["json"] = "OK"
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -150,7 +160,8 @@ func (c *CiiuDivisionController) Put() {
 // @Failure 403 id is empty
 // @router /:id [delete]
 func (c *CiiuDivisionController) Delete() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	if err := models.DeleteCiiuDivision(id); err == nil {
 		c.Data["json"] = "OK"
 	} else {

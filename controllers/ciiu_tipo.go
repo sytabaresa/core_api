@@ -1,15 +1,16 @@
 package controllers
 
 import (
-	"github.com/udistrital/core_api/models"
 	"encoding/json"
 	"errors"
+	"github.com/udistrital/core_api/models"
+	"strconv"
 	"strings"
 
 	"github.com/astaxie/beego"
 )
 
-// CiiuTipoController oprations for CiiuTipo
+// CiiuTipoController operations for CiiuTipo
 type CiiuTipoController struct {
 	beego.Controller
 }
@@ -53,7 +54,8 @@ func (c *CiiuTipoController) Post() {
 // @Failure 403 :id is empty
 // @router /:id [get]
 func (c *CiiuTipoController) GetOne() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	v, err := models.GetCiiuTipoById(id)
 	if err != nil {
 		c.Data["json"] = err.Error()
@@ -135,7 +137,8 @@ func (c *CiiuTipoController) GetAll() {
 // @Failure 403 :id is not int
 // @router /:id [put]
 func (c *CiiuTipoController) Put() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	v := models.CiiuTipo{Id: id}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
 		if err := models.UpdateCiiuTipoById(&v); err == nil {
@@ -157,7 +160,8 @@ func (c *CiiuTipoController) Put() {
 // @Failure 403 id is empty
 // @router /:id [delete]
 func (c *CiiuTipoController) Delete() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	if err := models.DeleteCiiuTipo(id); err == nil {
 		c.Data["json"] = "OK"
 	} else {

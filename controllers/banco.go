@@ -10,7 +10,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-// BancoController oprations for Banco
+// BancoController operations for Banco
 type BancoController struct {
 	beego.Controller
 }

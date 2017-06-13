@@ -10,7 +10,7 @@ import (
 )
 
 type CiiuTipo struct {
-	Id     string    `orm:"column(id_tipo);pk"`
+	Id     int    `orm:"column(id_tipo);pk"`
 	Nombre string `orm:"column(nombre)"`
 }
 
@@ -32,7 +32,7 @@ func AddCiiuTipo(m *CiiuTipo) (id int64, err error) {
 
 // GetCiiuTipoById retrieves CiiuTipo by Id. Returns error if
 // Id doesn't exist
-func GetCiiuTipoById(id string) (v *CiiuTipo, err error) {
+func GetCiiuTipoById(id int) (v *CiiuTipo, err error) {
 	o := orm.NewOrm()
 	v = &CiiuTipo{Id: id}
 	if err = o.Read(v); err == nil {
@@ -51,7 +51,11 @@ func GetAllCiiuTipo(query map[string]string, fields []string, sortby []string, o
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string
@@ -132,7 +136,7 @@ func UpdateCiiuTipoById(m *CiiuTipo) (err error) {
 
 // DeleteCiiuTipo deletes CiiuTipo by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteCiiuTipo(id string) (err error) {
+func DeleteCiiuTipo(id int) (err error) {
 	o := orm.NewOrm()
 	v := CiiuTipo{Id: id}
 	// ascertain id exists in the database

@@ -5,51 +5,60 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/astaxie/beego/orm"
 )
 
-type Tipo_entidad struct {
-	Id                int `orm:"column(id);pk"`
-	Descripcion       string `orm:"column(descripcion);"`
-	Fecha_creacion     string `orm:"column(fecha_creacion)"`
-	Fecha_modificacion string `orm:"column(fecha_modificacion)"`
+type TipoEntidad struct {
+	Id                int       `orm:"column(id);pk"`
+	Descripcion       string    `orm:"column(descripcion)"`
+	FechaCreacion     time.Time `orm:"column(fecha_creacion);type(date)"`
+	FechaModificacion time.Time `orm:"column(fecha_modificacion);type(date)"`
+}
+
+func (t *TipoEntidad) TableName() string {
+	return "tipo_entidad"
 }
 
 func init() {
-	orm.RegisterModel(new(Tipo_entidad))
+	orm.RegisterModel(new(TipoEntidad))
 }
 
-// AddTipo_entidad insert a new Tipo_entidad into database and returns
+// AddTipoEntidad insert a new TipoEntidad into database and returns
 // last inserted Id on success.
-func AddTipo_entidad(m *Tipo_entidad) (id int64, err error) {
+func AddTipoEntidad(m *TipoEntidad) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
 }
 
-// GetTipo_entidadById retrieves Tipo_entidad by Id. Returns error if
+// GetTipoEntidadById retrieves TipoEntidad by Id. Returns error if
 // Id doesn't exist
-func GetTipo_entidadById(id int) (v *Tipo_entidad, err error) {
+func GetTipoEntidadById(id int) (v *TipoEntidad, err error) {
 	o := orm.NewOrm()
-	v = &Tipo_entidad{Id: id}
+	v = &TipoEntidad{Id: id}
 	if err = o.Read(v); err == nil {
 		return v, nil
 	}
 	return nil, err
 }
 
-// GetAllTipo_entidad retrieves all Tipo_entidad matches certain condition. Returns empty list if
+// GetAllTipoEntidad retrieves all TipoEntidad matches certain condition. Returns empty list if
 // no records exist
-func GetAllTipo_entidad(query map[string]string, fields []string, sortby []string, order []string,
+func GetAllTipoEntidad(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(Tipo_entidad))
+	qs := o.QueryTable(new(TipoEntidad))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string
@@ -90,7 +99,7 @@ func GetAllTipo_entidad(query map[string]string, fields []string, sortby []strin
 		}
 	}
 
-	var l []Tipo_entidad
+	var l []TipoEntidad
 	qs = qs.OrderBy(sortFields...)
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
@@ -113,11 +122,11 @@ func GetAllTipo_entidad(query map[string]string, fields []string, sortby []strin
 	return nil, err
 }
 
-// UpdateTipo_entidad updates Tipo_entidad by Id and returns error if
+// UpdateTipoEntidad updates TipoEntidad by Id and returns error if
 // the record to be updated doesn't exist
-func UpdateTipo_entidadById(m *Tipo_entidad) (err error) {
+func UpdateTipoEntidadById(m *TipoEntidad) (err error) {
 	o := orm.NewOrm()
-	v := Tipo_entidad{Id: m.Id}
+	v := TipoEntidad{Id: m.Id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
@@ -128,15 +137,15 @@ func UpdateTipo_entidadById(m *Tipo_entidad) (err error) {
 	return
 }
 
-// DeleteTipo_entidad deletes Tipo_entidad by Id and returns error if
+// DeleteTipoEntidad deletes TipoEntidad by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteTipo_entidad(id int) (err error) {
+func DeleteTipoEntidad(id int) (err error) {
 	o := orm.NewOrm()
-	v := Tipo_entidad{Id: id}
+	v := TipoEntidad{Id: id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
-		if num, err = o.Delete(&Tipo_entidad{Id: id}); err == nil {
+		if num, err = o.Delete(&TipoEntidad{Id: id}); err == nil {
 			fmt.Println("Number of records deleted in database:", num)
 		}
 	}

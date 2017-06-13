@@ -10,9 +10,13 @@ import (
 )
 
 type CiiuDivision struct {
-	Id         string `orm:"column(id_division);pk"`
-	Tipo       string `orm:"column(tipo)"`
-	Nombre     string `orm:"column(nombre)"`
+	Tipo   *CiiuTipo `orm:"column(tipo);rel(fk)"`
+	Id     int       `orm:"column(id_division);pk"`
+	Nombre string    `orm:"column(nombre)"`
+}
+
+func (t *CiiuDivision) TableName() string {
+	return "ciiu_division"
 }
 
 func init() {
@@ -29,7 +33,7 @@ func AddCiiuDivision(m *CiiuDivision) (id int64, err error) {
 
 // GetCiiuDivisionById retrieves CiiuDivision by Id. Returns error if
 // Id doesn't exist
-func GetCiiuDivisionById(id string) (v *CiiuDivision, err error) {
+func GetCiiuDivisionById(id int) (v *CiiuDivision, err error) {
 	o := orm.NewOrm()
 	v = &CiiuDivision{Id: id}
 	if err = o.Read(v); err == nil {
@@ -43,12 +47,16 @@ func GetCiiuDivisionById(id string) (v *CiiuDivision, err error) {
 func GetAllCiiuDivision(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(CiiuDivision)).RelatedSel(5)
+	qs := o.QueryTable(new(CiiuDivision))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string
@@ -129,7 +137,7 @@ func UpdateCiiuDivisionById(m *CiiuDivision) (err error) {
 
 // DeleteCiiuDivision deletes CiiuDivision by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteCiiuDivision(id string) (err error) {
+func DeleteCiiuDivision(id int) (err error) {
 	o := orm.NewOrm()
 	v := CiiuDivision{Id: id}
 	// ascertain id exists in the database

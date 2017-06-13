@@ -2,10 +2,11 @@ package main
 
 import (
 	_ "github.com/udistrital/core_api/routers"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-	_ "github.com/lib/pq"
 	"github.com/astaxie/beego/plugins/cors"
+	_ "github.com/lib/pq"
 )
 
 func init() {
@@ -13,11 +14,10 @@ func init() {
 }
 
 func main() {
-	orm.Debug = true
-
 	if beego.BConfig.RunMode == "dev" {
-	        beego.BConfig.WebConfig.DirectoryIndex = true
-				}
+		beego.BConfig.WebConfig.DirectoryIndex = true
+		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
+	}
 
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowOrigins: []string{"*"},
@@ -31,6 +31,5 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
-
 	beego.Run()
 }

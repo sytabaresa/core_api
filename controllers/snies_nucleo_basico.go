@@ -10,7 +10,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-//  SniesNucleoBasicoController operations for SniesNucleoBasico
+// SniesNucleoBasicoController operations for SniesNucleoBasico
 type SniesNucleoBasicoController struct {
 	beego.Controller
 }
@@ -33,10 +33,13 @@ func (c *SniesNucleoBasicoController) URLMapping() {
 // @router / [post]
 func (c *SniesNucleoBasicoController) Post() {
 	var v models.SniesNucleoBasico
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if _, err := models.AddSniesNucleoBasico(&v); err == nil {
-		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if _, err := models.AddSniesNucleoBasico(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -135,11 +138,14 @@ func (c *SniesNucleoBasicoController) GetAll() {
 // @router /:id [put]
 func (c *SniesNucleoBasicoController) Put() {
 	idStr := c.Ctx.Input.Param(":id")
-		id, _ := strconv.Atoi(idStr)
+	id, _ := strconv.Atoi(idStr)
 	v := models.SniesNucleoBasico{Id: id}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if err := models.UpdateSniesNucleoBasicoById(&v); err == nil {
-		c.Data["json"] = "OK"
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if err := models.UpdateSniesNucleoBasicoById(&v); err == nil {
+			c.Data["json"] = "OK"
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -155,7 +161,7 @@ func (c *SniesNucleoBasicoController) Put() {
 // @router /:id [delete]
 func (c *SniesNucleoBasicoController) Delete() {
 	idStr := c.Ctx.Input.Param(":id")
-		id, _ := strconv.Atoi(idStr)
+	id, _ := strconv.Atoi(idStr)
 	if err := models.DeleteSniesNucleoBasico(id); err == nil {
 		c.Data["json"] = "OK"
 	} else {

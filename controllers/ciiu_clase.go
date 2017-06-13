@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/udistrital/core_api/models"
+	"strconv"
 	"strings"
+
 	"github.com/astaxie/beego"
 )
 
-//  CiiuClaseController operations for CiiuClase
+// CiiuClaseController operations for CiiuClase
 type CiiuClaseController struct {
 	beego.Controller
 }
@@ -31,10 +33,13 @@ func (c *CiiuClaseController) URLMapping() {
 // @router / [post]
 func (c *CiiuClaseController) Post() {
 	var v models.CiiuClase
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if _, err := models.AddCiiuClase(&v); err == nil {
-		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if _, err := models.AddCiiuClase(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -49,7 +54,8 @@ func (c *CiiuClaseController) Post() {
 // @Failure 403 :id is empty
 // @router /:id [get]
 func (c *CiiuClaseController) GetOne() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	v, err := models.GetCiiuClaseById(id)
 	if err != nil {
 		c.Data["json"] = err.Error()
@@ -131,11 +137,15 @@ func (c *CiiuClaseController) GetAll() {
 // @Failure 403 :id is not int
 // @router /:id [put]
 func (c *CiiuClaseController) Put() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	v := models.CiiuClase{Id: id}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if err := models.UpdateCiiuClaseById(&v); err == nil {
-		c.Data["json"] = "OK"
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if err := models.UpdateCiiuClaseById(&v); err == nil {
+			c.Data["json"] = "OK"
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -150,7 +160,8 @@ func (c *CiiuClaseController) Put() {
 // @Failure 403 id is empty
 // @router /:id [delete]
 func (c *CiiuClaseController) Delete() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	if err := models.DeleteCiiuClase(id); err == nil {
 		c.Data["json"] = "OK"
 	} else {

@@ -10,12 +10,10 @@ import (
 )
 
 type RubrosDependencia struct {
-	Id                     int                     `orm:"column(id);pk;auto"`
-  Estado                 string                  `orm:"column(estado)"`
-  //Este atributo no debería ser llave foránea con rubros, diferentes esquemas.
-	RubroId                 int                     `orm:"column(rubro_id)"`
-  //Cuando se una oikos al core: DependenciaId es foránea de dependencia(id).
-	DependenciaId               int                 `orm:"column(dependencia_id)"`
+	Id            int    `orm:"column(id);pk"`
+	Estado        string `orm:"column(estado)"`
+	DependenciaId int    `orm:"column(dependencia_id)"`
+	RubroId       int    `orm:"column(rubro_id)"`
 }
 
 func (t *RubrosDependencia) TableName() string {
@@ -50,12 +48,16 @@ func GetRubrosDependenciaById(id int) (v *RubrosDependencia, err error) {
 func GetAllRubrosDependencia(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(RubrosDependencia)).RelatedSel(5)
+	qs := o.QueryTable(new(RubrosDependencia))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string

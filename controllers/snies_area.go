@@ -10,7 +10,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-//  SniesAreaController operations for SniesArea
+// SniesAreaController operations for SniesArea
 type SniesAreaController struct {
 	beego.Controller
 }
@@ -33,10 +33,13 @@ func (c *SniesAreaController) URLMapping() {
 // @router / [post]
 func (c *SniesAreaController) Post() {
 	var v models.SniesArea
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if _, err := models.AddSniesArea(&v); err == nil {
-		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if _, err := models.AddSniesArea(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -137,9 +140,12 @@ func (c *SniesAreaController) Put() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.Atoi(idStr)
 	v := models.SniesArea{Id: id}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if err := models.UpdateSniesAreaById(&v); err == nil {
-		c.Data["json"] = "OK"
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if err := models.UpdateSniesAreaById(&v); err == nil {
+			c.Data["json"] = "OK"
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-// SucursalController oprations for Sucursal
+// SucursalController operations for Sucursal
 type SucursalController struct {
 	beego.Controller
 }

@@ -5,13 +5,18 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
 	"github.com/astaxie/beego/orm"
 )
 
 type CiiuClase struct {
-	Division string `orm:"column(division)"`
-	Id       string `orm:"column(id_clase);pk"`
-	Nombre   string `orm:"column(nombre)`
+	Division *CiiuDivision `orm:"column(division);rel(fk)"`
+	Id       int           `orm:"column(id_clase);pk"`
+	Nombre   string        `orm:"column(nombre)"`
+}
+
+func (t *CiiuClase) TableName() string {
+	return "ciiu_clase"
 }
 
 func init() {
@@ -28,7 +33,7 @@ func AddCiiuClase(m *CiiuClase) (id int64, err error) {
 
 // GetCiiuClaseById retrieves CiiuClase by Id. Returns error if
 // Id doesn't exist
-func GetCiiuClaseById(id string) (v *CiiuClase, err error) {
+func GetCiiuClaseById(id int) (v *CiiuClase, err error) {
 	o := orm.NewOrm()
 	v = &CiiuClase{Id: id}
 	if err = o.Read(v); err == nil {
@@ -42,12 +47,16 @@ func GetCiiuClaseById(id string) (v *CiiuClase, err error) {
 func GetAllCiiuClase(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(CiiuClase)).RelatedSel(5)
+	qs := o.QueryTable(new(CiiuClase))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string
@@ -128,7 +137,7 @@ func UpdateCiiuClaseById(m *CiiuClase) (err error) {
 
 // DeleteCiiuClase deletes CiiuClase by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteCiiuClase(id string) (err error) {
+func DeleteCiiuClase(id int) (err error) {
 	o := orm.NewOrm()
 	v := CiiuClase{Id: id}
 	// ascertain id exists in the database

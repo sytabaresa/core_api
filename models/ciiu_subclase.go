@@ -10,9 +10,13 @@ import (
 )
 
 type CiiuSubclase struct {
-	Clase  string `orm:"column(clase)"`
-	Id     string `orm:"column(id_subclase);pk"`
-	Nombre string `orm:"column(nombre)"`
+	Clase  *CiiuClase `orm:"column(clase);rel(fk)"`
+	Id     int        `orm:"column(id_subclase);pk"`
+	Nombre string     `orm:"column(nombre)"`
+}
+
+func (t *CiiuSubclase) TableName() string {
+	return "ciiu_subclase"
 }
 
 func init() {
@@ -29,7 +33,7 @@ func AddCiiuSubclase(m *CiiuSubclase) (id int64, err error) {
 
 // GetCiiuSubclaseById retrieves CiiuSubclase by Id. Returns error if
 // Id doesn't exist
-func GetCiiuSubclaseById(id string) (v *CiiuSubclase, err error) {
+func GetCiiuSubclaseById(id int) (v *CiiuSubclase, err error) {
 	o := orm.NewOrm()
 	v = &CiiuSubclase{Id: id}
 	if err = o.Read(v); err == nil {
@@ -43,12 +47,16 @@ func GetCiiuSubclaseById(id string) (v *CiiuSubclase, err error) {
 func GetAllCiiuSubclase(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(CiiuSubclase)).RelatedSel(5)
+	qs := o.QueryTable(new(CiiuSubclase))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string
@@ -129,7 +137,7 @@ func UpdateCiiuSubclaseById(m *CiiuSubclase) (err error) {
 
 // DeleteCiiuSubclase deletes CiiuSubclase by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteCiiuSubclase(id string) (err error) {
+func DeleteCiiuSubclase(id int) (err error) {
 	o := orm.NewOrm()
 	v := CiiuSubclase{Id: id}
 	// ascertain id exists in the database

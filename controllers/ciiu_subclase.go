@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/udistrital/core_api/models"
+	"strconv"
 	"strings"
+
 	"github.com/astaxie/beego"
 )
 
-//  CiiuSubclaseController operations for CiiuSubclase
+// CiiuSubclaseController operations for CiiuSubclase
 type CiiuSubclaseController struct {
 	beego.Controller
 }
@@ -31,10 +33,13 @@ func (c *CiiuSubclaseController) URLMapping() {
 // @router / [post]
 func (c *CiiuSubclaseController) Post() {
 	var v models.CiiuSubclase
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if _, err := models.AddCiiuSubclase(&v); err == nil {
-		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if _, err := models.AddCiiuSubclase(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -49,7 +54,8 @@ func (c *CiiuSubclaseController) Post() {
 // @Failure 403 :id is empty
 // @router /:id [get]
 func (c *CiiuSubclaseController) GetOne() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	v, err := models.GetCiiuSubclaseById(id)
 	if err != nil {
 		c.Data["json"] = err.Error()
@@ -131,11 +137,15 @@ func (c *CiiuSubclaseController) GetAll() {
 // @Failure 403 :id is not int
 // @router /:id [put]
 func (c *CiiuSubclaseController) Put() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	v := models.CiiuSubclase{Id: id}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if err := models.UpdateCiiuSubclaseById(&v); err == nil {
-		c.Data["json"] = "OK"
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if err := models.UpdateCiiuSubclaseById(&v); err == nil {
+			c.Data["json"] = "OK"
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -150,7 +160,8 @@ func (c *CiiuSubclaseController) Put() {
 // @Failure 403 id is empty
 // @router /:id [delete]
 func (c *CiiuSubclaseController) Delete() {
-	id := c.Ctx.Input.Param(":id")
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
 	if err := models.DeleteCiiuSubclase(id); err == nil {
 		c.Data["json"] = "OK"
 	} else {

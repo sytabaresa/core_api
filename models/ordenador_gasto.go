@@ -10,10 +10,9 @@ import (
 )
 
 type OrdenadorGasto struct {
-	Id                     int                     `orm:"column(id);pk;auto"`
-  Cargo                 string                  `orm:"column(cargo)"`
-  //Cuando se una oikos al core: DependenciaId es foránea de dependencia(id).
-	DependenciaId               int                 `orm:"column(dependencia_id)"`
+	Id            int    `orm:"column(id);pk"`
+	Cargo         string `orm:"column(cargo)"`
+	DependenciaId int    `orm:"column(dependencia_id)"`
 }
 
 func (t *OrdenadorGasto) TableName() string {
@@ -48,12 +47,16 @@ func GetOrdenadorGastoById(id int) (v *OrdenadorGasto, err error) {
 func GetAllOrdenadorGasto(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(OrdenadorGasto)).RelatedSel(5)
+	qs := o.QueryTable(new(OrdenadorGasto))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string

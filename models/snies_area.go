@@ -10,10 +10,14 @@ import (
 )
 
 type SniesArea struct {
-	Id          int		 `orm:"column(id_area);pk"`
+	Id          int    `orm:"column(id_area);pk"`
 	Nombre      string `orm:"column(nombre)"`
-	Descripcion string `orm:"column(descripcion)"`
+	Descripcion string `orm:"column(descripcion);null"`
 	Estado      string `orm:"column(estado)"`
+}
+
+func (t *SniesArea) TableName() string {
+	return "snies_area"
 }
 
 func init() {
@@ -44,12 +48,16 @@ func GetSniesAreaById(id int) (v *SniesArea, err error) {
 func GetAllSniesArea(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(SniesArea)).RelatedSel(5)
+	qs := o.QueryTable(new(SniesArea))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string

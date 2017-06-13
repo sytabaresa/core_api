@@ -5,59 +5,57 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
+
 	"github.com/astaxie/beego/orm"
 )
 
-type JefeDependencia struct {
-	Id                     int                     `orm:"column(id);pk;auto"`
-  FechaInicio      time.Time                    `orm:"column(fecha_inicio)"`
-  FechaFin      time.Time                    `orm:"column(fecha_fin)"`
-  //Este atributo no debería ser llave foránea con terceros, diferentes esquemas.
-	TerceroId                 int                     `orm:"column(tercero_id)"`
-  //Cuando se una oikos al core: DependenciaId es foránea de dependencia(id).
-	DependenciaId               int                 `orm:"column(dependencia_id)"`
-	ActaAprobacion                 string                  `orm:"column(acta_aprobacion)"`
+type RupTipo struct {
+	Id               int    `orm:"column(id_tipo_especialidad);pk"`
+	TipoEspecialidad string `orm:"column(tipo_especialidad);null"`
 }
 
-func (t *JefeDependencia) TableName() string {
-	return "jefe_dependencia"
+func (t *RupTipo) TableName() string {
+	return "rup_tipo"
 }
 
 func init() {
-	orm.RegisterModel(new(JefeDependencia))
+	orm.RegisterModel(new(RupTipo))
 }
 
-// AddJefeDependencia insert a new JefeDependencia into database and returns
+// AddRupTipo insert a new RupTipo into database and returns
 // last inserted Id on success.
-func AddJefeDependencia(m *JefeDependencia) (id int64, err error) {
+func AddRupTipo(m *RupTipo) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
 }
 
-// GetJefeDependenciaById retrieves JefeDependencia by Id. Returns error if
+// GetRupTipoById retrieves RupTipo by Id. Returns error if
 // Id doesn't exist
-func GetJefeDependenciaById(id int) (v *JefeDependencia, err error) {
+func GetRupTipoById(id int) (v *RupTipo, err error) {
 	o := orm.NewOrm()
-	v = &JefeDependencia{Id: id}
+	v = &RupTipo{Id: id}
 	if err = o.Read(v); err == nil {
 		return v, nil
 	}
 	return nil, err
 }
 
-// GetAllJefeDependencia retrieves all JefeDependencia matches certain condition. Returns empty list if
+// GetAllRupTipo retrieves all RupTipo matches certain condition. Returns empty list if
 // no records exist
-func GetAllJefeDependencia(query map[string]string, fields []string, sortby []string, order []string,
+func GetAllRupTipo(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(JefeDependencia)).RelatedSel(5)
+	qs := o.QueryTable(new(RupTipo))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string
@@ -98,7 +96,7 @@ func GetAllJefeDependencia(query map[string]string, fields []string, sortby []st
 		}
 	}
 
-	var l []JefeDependencia
+	var l []RupTipo
 	qs = qs.OrderBy(sortFields...)
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
@@ -121,11 +119,11 @@ func GetAllJefeDependencia(query map[string]string, fields []string, sortby []st
 	return nil, err
 }
 
-// UpdateJefeDependencia updates JefeDependencia by Id and returns error if
+// UpdateRupTipo updates RupTipo by Id and returns error if
 // the record to be updated doesn't exist
-func UpdateJefeDependenciaById(m *JefeDependencia) (err error) {
+func UpdateRupTipoById(m *RupTipo) (err error) {
 	o := orm.NewOrm()
-	v := JefeDependencia{Id: m.Id}
+	v := RupTipo{Id: m.Id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
@@ -136,15 +134,15 @@ func UpdateJefeDependenciaById(m *JefeDependencia) (err error) {
 	return
 }
 
-// DeleteJefeDependencia deletes JefeDependencia by Id and returns error if
+// DeleteRupTipo deletes RupTipo by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteJefeDependencia(id int) (err error) {
+func DeleteRupTipo(id int) (err error) {
 	o := orm.NewOrm()
-	v := JefeDependencia{Id: id}
+	v := RupTipo{Id: id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
-		if num, err = o.Delete(&JefeDependencia{Id: id}); err == nil {
+		if num, err = o.Delete(&RupTipo{Id: id}); err == nil {
 			fmt.Println("Number of records deleted in database:", num)
 		}
 	}
