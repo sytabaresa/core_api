@@ -47,7 +47,7 @@ func GetTipoContactoById(id int) (v *TipoContacto, err error) {
 func GetAllTipoContacto(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(TipoContacto))
+	qs := o.QueryTable(new(TipoContacto)).RelatedSel()
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute

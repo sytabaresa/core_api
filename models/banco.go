@@ -17,7 +17,7 @@ type Banco struct {
 	Nit                    string  `orm:"column(nit)"`
 	CodigoSuperintendencia float64 `orm:"column(codigo_superintendencia)"`
 	CodigoAch              float64 `orm:"column(codigo_ach)"`
-	EstadoActivo           bool    `orm:"column(estado_activo)"`
+	EstadoActivo           bool    `orm:"column(estado_activo);null"`
 }
 
 func (t *Banco) TableName() string {
@@ -52,7 +52,7 @@ func GetBancoById(id int) (v *Banco, err error) {
 func GetAllBanco(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(Banco))
+	qs := o.QueryTable(new(Banco)).RelatedSel()
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
