@@ -3,9 +3,12 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/udistrital/core_api/models"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/structs"
+	"github.com/udistrital/api_financiera/utilidades"
+	"github.com/udistrital/core_api/models"
 
 	"github.com/astaxie/beego"
 )
@@ -36,12 +39,20 @@ func (c *BancoController) Post() {
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
 		if _, err := models.AddBanco(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
-			c.Data["json"] = v
+			alert := models.Alert{Type: "success", Code: "S_543", Body: nil}
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = alert
 		} else {
-			c.Data["json"] = err.Error()
+			alertdb := structs.Map(err)
+			var code string
+			utilidades.FillStruct(alertdb["Code"], &code)
+			alert := models.Alert{Type: "error", Code: "E_" + code, Body: err.Error()}
+			c.Data["json"] = alert
 		}
 	} else {
-		c.Data["json"] = err.Error()
+		c.Ctx.Output.SetStatus(403)
+		alert := models.Alert{Type: "error", Code: "E_0458", Body: nil}
+		c.Data["json"] = alert
 	}
 	c.ServeJSON()
 }
@@ -142,12 +153,21 @@ func (c *BancoController) Put() {
 	v := models.Banco{Id: id}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
 		if err := models.UpdateBancoById(&v); err == nil {
-			c.Data["json"] = "OK"
+			c.Ctx.Output.SetStatus(201)
+			alert := models.Alert{Type: "success", Code: "S_588", Body: nil}
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = alert
 		} else {
-			c.Data["json"] = err.Error()
+			alertdb := structs.Map(err)
+			var code string
+			utilidades.FillStruct(alertdb["Code"], &code)
+			alert := models.Alert{Type: "error", Code: "E_" + code, Body: err.Error()}
+			c.Data["json"] = alert
 		}
 	} else {
-		c.Data["json"] = err.Error()
+		c.Ctx.Output.SetStatus(403)
+		alert := models.Alert{Type: "error", Code: "E_0458", Body: err.Error()}
+		c.Data["json"] = alert
 	}
 	c.ServeJSON()
 }
